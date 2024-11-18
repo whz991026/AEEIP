@@ -159,7 +159,7 @@ EM_function <- function(r_t_pure,r_t_mix,beta,alpha_a=NA,alpha_b=NA,tau_a,l,prop
   lm_x <- (alpha_a_no_bayes-alpha_b_no_bayes)
   lm_y <- as.numeric(as.vector(lm_y))
   lm_x <- as.numeric(as.vector(lm_x))
-  data = data.frame(cbind(lm_y,lm_x))
+  data = data.frame(lm_y,lm_x)
 
   lm_res <- lm(lm_y~lm_x-1,data)
 
