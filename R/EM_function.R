@@ -154,7 +154,9 @@ EM_function <- function(r_t_pure,r_t_mix,beta,alpha_a=NA,alpha_b=NA,tau_a,l,prop
 
 
   alpha_m <- r_t_mix/sum(r_t_mix)
-
+  alpha_m <- as.numeric(alpha_m) 
+  alpha_b_no_bayes <- as.numeric(alpha_b_no_bayes)
+  alpha_a_no_bayes <- as.numeric(alpha_a_no_bayes)
   lm_y <- (alpha_m -alpha_b_no_bayes)
   lm_x <- (alpha_a_no_bayes-alpha_b_no_bayes)
   lm_y <- as.numeric(as.vector(lm_y))
