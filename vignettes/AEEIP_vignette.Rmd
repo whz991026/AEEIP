@@ -1,0 +1,310 @@
+---
+title: "<center>AEEIP_vignette</center>"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+abstract: |
+  To evaluate antibody quality,we propose the novel Antibody Efficiency Estimation from 
+  Immunoprecipitation data (AEEIP) model. It contains a maximum a posterior (MAP) estimate
+  the efficiency of antibody. It is able to calculate the proportion of mixed Input
+  sample in IP sample. It also try to change the hyper parameter of beat prior to
+  get the better result.Please don't hesitate to contact <Haozhe.Wang17@student.xjtlu.edu.cn> 
+  if you have any questions.\n <center> **Table of content** </center>
+vignette: >
+  %\VignetteIndexEntry{AEEIP_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  % \VignetteDepends{ggplot2} 
+  % \VignetteDepends{DESeq2} 
+  % \VignetteDepends{ggVennDiagram}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+# install.packages("devtools")
+# library("devtools")
+# install_github("whz991026/AEEIP")
+
+library(AEEIP)
+```
+
+## load other libraries
+Load the other packages:
+
+* library(ggVennDiagram)
+* library(DESeq2)
+```{r, include=FALSE}
+
+
+# install.packages("ggVennDiagram")
+
+library(ggVennDiagram)
+library(DESeq2)
+
+#    install.packages("ggplot2")
+
+library(ggplot2)
+```
+
+## 0.1
+### simulate data
+This section is getting the simulate data with 0.1 mix rate and replicates is 3
+```{r}
+
+# the mix rate is 0.1
+set.seed(1)
+data <-simulateData(T=10000, hyper_a_1=20,hyper_b_1 =0.2, hyper_a_2=50,hyper_b_2 =0.05,
+pure_rate=0.99,mix_rate=0.1,mode=2,replicates=3)
+
+```
+
+
+### corrected the bias
+
+#### replicates 1
+corrected the bias for the replicates 1
+```{r}
+
+set.seed(1)
+# firstly we set the initial tau is near to 0 and let the size of beta to be large enough
+# to see the plot
+res <- AEEIP_test(r_t_pure=data[[3]][[1]],r_t_mix=data[[4]][[1]],beta=sum(data[[4]][[1]])*1e1,alpha_a=NA,
+alpha_b=NA,tau_a_vector=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
+max_iteration =1e6,stop_stepsize=1e-7)
+
+
+# plot
+data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_bayes_vector_aeeip))
+colnames(data.frame) <- c("tau_a_no_bayes","tau_a_bayes")
+ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=tau_a_bayes))+geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+geom_line(aes(x=tau_a_no_bayes,y=tau_a_no_bayes), colour="blue")
+# from the plot we can see that is near to 0.1
+
+
+
+data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector))
+colnames(data.frame) <- c("tau_a_no_bayes","diff")
+ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=diff))+geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
+
+#We selected the prop where the learned LM coefficient and the tau coefficient 
+#changed. The corresponding index is determined as follows: 
+
+ # we select the smallest tau the derivative >0.01
+ index <- min(which(diff(res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector)/diff(res$tau_a_no_bayes_vector_aeeip)>0.01))+1 # +1 because the derivative is length-1
+
+
+res1 <- EM_function(r_t_pure=data[[3]][[1]],r_t_mix=data[[4]][[1]],beta=sum(data[[4]][[1]])*1e1,alpha_a=NA,
+alpha_b=NA,tau_a=0,l=1,prop=seq(0.01,0.99,by=0.01)[index],
+max_iteration =1e6,stop_stepsize=1e-7)
+
+# the number of step is too small 
+# we need to choose another size
+
+res_replicate1 <- res1
+
+
+res_replicate1$tau_a_bayes
+```
+
+
+
+#### replicates 2
+```{r}
+
+set.seed(1)
+# firstly we set the initial tau is near to 0 and let the size of beta to be large enough,
+# to see the plot
+res <- AEEIP_test(r_t_pure=data[[3]][[2]],r_t_mix=data[[4]][[2]],beta=sum(data[[4]][[2]])*1e1,alpha_a=NA,
+alpha_b=NA,tau_a_vector=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
+max_iteration =1e6,stop_stepsize=1e-7)
+
+
+# plot
+data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_bayes_vector_aeeip))
+colnames(data.frame) <- c("tau_a_no_bayes","tau_a_bayes")
+ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=tau_a_bayes))+geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+geom_line(aes(x=tau_a_no_bayes,y=tau_a_no_bayes), colour="blue")
+# from the plot we can see that is near to 0.1
+
+
+data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector))
+colnames(data.frame) <- c("tau_a_no_bayes","diff")
+ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=diff))+geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
+
+#We selected the prop where the learned LM coefficient and the tau coefficient 
+#changed. The corresponding index is determined as follows: 
+
+ # we select the smallest tau the derivative >0.01
+ index <- min(which(diff(res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector)/diff(res$tau_a_no_bayes_vector_aeeip)>0.01))+1 # +1 because the derivative is length-1
+ 
+
+res1 <- EM_function(r_t_pure=data[[3]][[2]],r_t_mix=data[[4]][[2]],beta=sum(data[[4]][[2]])*1e1,alpha_a=NA,
+alpha_b=NA,tau_a=0,l=1,prop=seq(0.01,0.99,by=0.01)[index],
+max_iteration =1e6,stop_stepsize=1e-7)
+
+res_replicate2 <- res1
+
+
+res_replicate2$tau_a_bayes
+```
+
+
+
+
+#### replicates 3
+```{r}
+
+set.seed(1)
+# firstly we set the initial tau is near to 0 and let the size of beta to be large enough,
+# to see the plot
+res <- AEEIP_test(r_t_pure=data[[3]][[3]],r_t_mix=data[[4]][[3]],beta=sum(data[[4]][[3]])*1e1,alpha_a=NA,
+alpha_b=NA,tau_a_vector=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
+max_iteration =1e6,stop_stepsize=1e-7)
+
+
+# plot
+data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_bayes_vector_aeeip))
+colnames(data.frame) <- c("tau_a_no_bayes","tau_a_bayes")
+ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=tau_a_bayes))+geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+geom_line(aes(x=tau_a_no_bayes,y=tau_a_no_bayes), colour="blue")
+# from the plot we can see that is near to 0.1
+
+
+data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector))
+colnames(data.frame) <- c("tau_a_no_bayes","diff")
+ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=diff))+geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
+
+#We selected the prop where the learned LM coefficient and the tau coefficient 
+#changed. The corresponding index is determined as follows: 
+
+ # we select the smallest tau the derivative >0.01
+ index <- min(which(diff(res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector)/diff(res$tau_a_no_bayes_vector_aeeip)>0.01))+1 # +1 because the derivative is length-1
+ 
+
+res1 <- EM_function(r_t_pure=data[[3]][[3]],r_t_mix=data[[4]][[3]],beta=sum(data[[4]][[3]])*1e1,alpha_a=NA,
+alpha_b=NA,tau_a=0,l=1,prop=seq(0.01,0.99,by=0.01)[index],
+max_iteration =1e6,stop_stepsize=1e-7)
+
+res_replicate3 <- res1
+
+res_replicate3$tau_a_bayes
+```
+
+### use the non_mix real data to run the DESeq2
+use DESeq2 to analysis the real data, to see the differential between the input and IP.
+```{r}
+    counts <- cbind(as.data.frame(data[[1]]),as.data.frame(data[[2]]))
+    design = data.frame(
+                    Trt = c(rep("input", dim(as.data.frame(data[[1]]))[2]),
+                            rep("IP", dim(as.data.frame(data[[1]]))[2])))
+    model = ~  Trt 
+    # 
+    dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts,
+                                colData = design,
+                                design = model)
+
+
+    data_size <- as.matrix(counts)
+
+
+    # first log
+    log_data <- log(data_size)
+    log_data [is.infinite(log_data)] <- NA
+    log_mean <- rowMeans(log_data)
+    log_s <- log_data-log_mean
+
+    # then exp
+    s_size <- exp(apply(log_s,2,function(x)median(x,na.rm=TRUE)))
+    names(s_size) <- NULL
+    dds$sizeFactor <- s_size
+    # DESeq2::sizeFactors(dds) = s_size
+
+    dds <- DESeq2::DESeq(dds, test = "Wald")
+    res_DESeq2_real = results(dds)#, name = "Trt_IP_vs_input"
+    
+    
+    res_DESeq2_real_01_1 <- res_DESeq2_real
+```
+
+### use the mix data to run the DESeq2
+use DESeq2 to analysis the mix data, to see the differential between the input and IP.
+```{r}
+    counts <- cbind(as.data.frame(data[[3]]),as.data.frame(data[[4]]))
+    design = data.frame(
+                    Trt = c(rep("input", dim(as.data.frame(data[[3]]))[2]),
+                            rep("IP", dim(as.data.frame(data[[3]]))[2])))
+    model = ~  Trt 
+    # 
+    dds <- DESeqDataSetFromMatrix(countData = counts,
+                                colData = design,
+                                design = model)
+ 
+    
+    data_size <- as.matrix(counts)
+  
+  
+    # first log
+    log_data <- log(data_size)
+    log_data [is.infinite(log_data)] <- NA
+    log_mean <- rowMeans(log_data)
+    log_s <- log_data-log_mean
+    
+    # then exp
+    s_size <- exp(apply(log_s,2,function(x)median(x,na.rm=TRUE)))
+    names(s_size) <- NULL
+    sizeFactors(dds) = s_size
+    
+    dds <- DESeq(dds, test = "Wald")
+    res_DESeq2_mix = DESeq2::results(dds)
+    
+    res_DESeq2_mix_01_1 <- res_DESeq2_mix
+```
+
+### use the corrected mix data to run the DESeq2 
+```{r}
+ 
+input <- as.data.frame(data[[3]])
+IP <- as.data.frame(data[[4]])
+
+res_DESeq2_mix_corrected <- DESeq2_AEEIP(list(res_replicate1,res_replicate2,res_replicate3),input,IP)
+```
+
+
+### evaluate
+```{r}
+
+
+# we see the difference is small for the corrected mix data
+ 
+
+# to see the i=relation between the three results
+index_real <- which(res_DESeq2_real$pvalue<=5e-2)
+threshold1 <- res_DESeq2_mix_corrected$pvalue[order(res_DESeq2_mix_corrected$pvalue)[length(index_real)]]
+threshold2 <- res_DESeq2_mix$pvalue[order(res_DESeq2_mix$pvalue)[length(index_real)]]
+index_mix_corrected <- which(res_DESeq2_mix_corrected$pvalue<=threshold1)
+index_mix <- which(res_DESeq2_mix$pvalue<=threshold2)
+ 
+index_list <- list(real=index_real,corrected=index_mix_corrected,
+                   mix=index_mix)
+ 
+
+ggVennDiagram(index_list,category.names = c("real","corrected","mix"),
+              label = "count", 
+              label_color = "black",
+              label_alpha = 0,
+              edge_lty = "dashed", 
+              edge_size = 1) +
+  scale_fill_gradient(low="white",high = "#b9292b",name = "gene count")
+
+
+
+
+# we can see the intersection between real data and corrected mix data is better than the mix data.
+
+
+```
+

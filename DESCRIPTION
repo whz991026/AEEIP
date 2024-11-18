@@ -1,0 +1,26 @@
+Package: AEEIP
+Title: Antibody Efficiency Estimation from Immunoprecipiation
+Version: 1.0
+Authors@R: 
+    c(person("Haozhe", "Wang", , "Haozhe.Wang17@student.xjtlu.edu.cn", role = c("aut", "cre")),
+    person("Yue", "Wang", , "Yue.Wang@student.xjtlu.edu.cn", role = c("ctb", "ths")),
+    person("Jia", "Meng", , "Jia.Meng@xjtlu.edu.cn", role = c("ctb", "ths")),
+    person("Jionglong ", "Su", , "Jionglong.Su@xjtlu.edu.cn", role = c("ctb", "ths")))
+Description: To evaluate antibody quality,we propose the novel Antibody Efficiency Estimation from 
+             Immunoprecipitation data (AEEIP) model. It contains a maximum a posterior (MAP) estimate
+             the efficiency of antibody. It is able to calculate the proportion of mixed Input
+             sample in IP sample. It also try to change the hyper parameter of beat prior to
+             get the better result.Please don't hesitate to contact <Haozhe.Wang17@student.xjtlu.edu.cn> 
+             if you have any questions.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Suggests: 
+    knitr,
+    rmarkdown,
+    ggplot2,
+    ggVennDiagram
+Imports:
+    DESeq2
+VignetteBuilder: knitr
