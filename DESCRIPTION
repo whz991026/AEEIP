@@ -24,3 +24,5 @@ Suggests:
 Imports:
     DESeq2
 VignetteBuilder: knitr
+URL: https://github.com/whz991026/AEEIP
+BugReports: https://github.com/whz991026/AEEIP/issues
