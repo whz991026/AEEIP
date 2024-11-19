@@ -45,7 +45,7 @@ DESeq2_AEEIP <- function(AEEIP_test_list, input, IP){
 
 
   for (i in 1:rep_num){
-    IP[,i] <- round(IP[,i]-sum(IP[,i])*AEEIP_test_list[[i]][["alpha_a_bayes"]])
+    IP[,i] <- round(IP[,i]-sum(IP[,i])*AEEIP_test_list[[i]][["alpha_a_bayes"]]* AEEIP_test_list[[i]][["tau_a_bayes"]])
   }
 
 
