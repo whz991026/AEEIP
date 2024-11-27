@@ -19,8 +19,8 @@ RoxygenNote: 7.3.2
 Suggests: 
     knitr,
     rmarkdown,
-    ggplot2,
-    ggVennDiagram
+    ggVennDiagram,
+    ggplot2
 Imports:
     DESeq2
 VignetteBuilder: knitr

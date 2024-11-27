@@ -79,35 +79,19 @@ res <- AEEIP_test(r_t_pure=data[[3]][[1]],r_t_mix=data[[4]][[1]],beta=sum(data[[
 alpha_b=NA,tau_a_vector=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
 max_iteration =1e6,stop_stepsize=1e-7)
 
+res1 <- AEEIP_test_final(res,r_t_pure=data[[3]][[1]],r_t_mix=data[[4]][[1]],beta=sum(data[[4]][[1]])*1e1,alpha_a=NA,                      alpha_b=NA,tau_a=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
+                     max_iteration =1e6,stop_stepsize=1e-7)
 
-# plot
-data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_bayes_vector_aeeip))
-colnames(data.frame) <- c("tau_a_no_bayes","tau_a_bayes")
-ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=tau_a_bayes))+geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+geom_line(aes(x=tau_a_no_bayes,y=tau_a_no_bayes), colour="blue")
-# from the plot we can see that is near to 0.1
+res_replicate1 <- res1[[1]]
+data.frame_1 <- res1[[2]]
+data.frame_2 <- res1[[3]]
 
+plot1 <- ggplot() + geom_point(data=data.frame_1,aes(x=`tau_a_no_bayes`,y=`tau_a_bayes`))+
+     geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+
+     geom_line(data=data.frame_1,aes(x=`tau_a_no_bayes`,y=`tau_a_no_bayes`), colour="blue")
 
-
-data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector))
-colnames(data.frame) <- c("tau_a_no_bayes","diff")
-ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=diff))+geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
-
-#We selected the prop where the learned LM coefficient and the tau coefficient 
-#changed. The corresponding index is determined as follows: 
-
- # we select the smallest tau the derivative >0.01
- index <- min(which(diff(res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector)/diff(res$tau_a_no_bayes_vector_aeeip)>0.01))+1 # +1 because the derivative is length-1
-
-
-res1 <- EM_function(r_t_pure=data[[3]][[1]],r_t_mix=data[[4]][[1]],beta=sum(data[[4]][[1]])*1e1,alpha_a=NA,
-alpha_b=NA,tau_a=0,l=1,prop=seq(0.01,0.99,by=0.01)[index],
-max_iteration =1e6,stop_stepsize=1e-7)
-
-# the number of step is too small 
-# we need to choose another size
-
-res_replicate1 <- res1
-
+plot2 <- ggplot() + geom_point(data=data.frame_2,aes(x=tau_a_no_bayes,y=diff))+
+     geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
 
 res_replicate1$tau_a_bayes
 ```
@@ -125,30 +109,19 @@ alpha_b=NA,tau_a_vector=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
 max_iteration =1e6,stop_stepsize=1e-7)
 
 
-# plot
-data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_bayes_vector_aeeip))
-colnames(data.frame) <- c("tau_a_no_bayes","tau_a_bayes")
-ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=tau_a_bayes))+geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+geom_line(aes(x=tau_a_no_bayes,y=tau_a_no_bayes), colour="blue")
-# from the plot we can see that is near to 0.1
+res1 <- AEEIP_test_final(res,r_t_pure=data[[3]][[2]],r_t_mix=data[[4]][[2]],beta=sum(data[[4]][[2]])*1e1,alpha_a=NA,                      alpha_b=NA,tau_a=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
+                     max_iteration =1e6,stop_stepsize=1e-7)
 
+res_replicate2 <- res1[[1]]
+data.frame_1 <- res1[[2]]
+data.frame_2 <- res1[[3]]
 
-data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector))
-colnames(data.frame) <- c("tau_a_no_bayes","diff")
-ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=diff))+geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
+plot1 <- ggplot() + geom_point(data=data.frame_1,aes(x=`tau_a_no_bayes`,y=`tau_a_bayes`))+
+     geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+
+     geom_line(data=data.frame_1,aes(x=`tau_a_no_bayes`,y=`tau_a_no_bayes`), colour="blue")
 
-#We selected the prop where the learned LM coefficient and the tau coefficient 
-#changed. The corresponding index is determined as follows: 
-
- # we select the smallest tau the derivative >0.01
- index <- min(which(diff(res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector)/diff(res$tau_a_no_bayes_vector_aeeip)>0.01))+1 # +1 because the derivative is length-1
- 
-
-res1 <- EM_function(r_t_pure=data[[3]][[2]],r_t_mix=data[[4]][[2]],beta=sum(data[[4]][[2]])*1e1,alpha_a=NA,
-alpha_b=NA,tau_a=0,l=1,prop=seq(0.01,0.99,by=0.01)[index],
-max_iteration =1e6,stop_stepsize=1e-7)
-
-res_replicate2 <- res1
-
+plot2 <- ggplot() + geom_point(data=data.frame_2,aes(x=tau_a_no_bayes,y=diff))+
+     geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
 
 res_replicate2$tau_a_bayes
 ```
@@ -166,30 +139,19 @@ res <- AEEIP_test(r_t_pure=data[[3]][[3]],r_t_mix=data[[4]][[3]],beta=sum(data[[
 alpha_b=NA,tau_a_vector=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
 max_iteration =1e6,stop_stepsize=1e-7)
 
+res1 <- AEEIP_test_final(res,r_t_pure=data[[3]][[3]],r_t_mix=data[[4]][[3]],beta=sum(data[[4]][[3]])*1e1,alpha_a=NA,                      alpha_b=NA,tau_a=0,l=1,prop_vector=seq(0.01,0.99,by=0.01),
+                     max_iteration =1e6,stop_stepsize=1e-7)
 
-# plot
-data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_bayes_vector_aeeip))
-colnames(data.frame) <- c("tau_a_no_bayes","tau_a_bayes")
-ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=tau_a_bayes))+geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+geom_line(aes(x=tau_a_no_bayes,y=tau_a_no_bayes), colour="blue")
-# from the plot we can see that is near to 0.1
+res_replicate3 <- res1[[1]]
+data.frame_1 <- res1[[2]]
+data.frame_2 <- res1[[3]]
 
+plot1 <- ggplot() + geom_point(data=data.frame_1,aes(x=`tau_a_no_bayes`,y=`tau_a_bayes`))+
+     geom_vline(aes(xintercept=0.1), colour="#BB0000", linetype="dashed")+
+     geom_line(data=data.frame_1,aes(x=`tau_a_no_bayes`,y=`tau_a_no_bayes`), colour="blue")
 
-data.frame <- as.data.frame(cbind(res$tau_a_no_bayes_vector_aeeip,res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector))
-colnames(data.frame) <- c("tau_a_no_bayes","diff")
-ggplot(data=data.frame) + geom_point(aes(x=tau_a_no_bayes,y=diff))+geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
-
-#We selected the prop where the learned LM coefficient and the tau coefficient 
-#changed. The corresponding index is determined as follows: 
-
- # we select the smallest tau the derivative >0.01
- index <- min(which(diff(res$tau_a_no_bayes_vector_aeeip-res$lm_tau_vector)/diff(res$tau_a_no_bayes_vector_aeeip)>0.01))+1 # +1 because the derivative is length-1
- 
-
-res1 <- EM_function(r_t_pure=data[[3]][[3]],r_t_mix=data[[4]][[3]],beta=sum(data[[4]][[3]])*1e1,alpha_a=NA,
-alpha_b=NA,tau_a=0,l=1,prop=seq(0.01,0.99,by=0.01)[index],
-max_iteration =1e6,stop_stepsize=1e-7)
-
-res_replicate3 <- res1
+plot2 <- ggplot() + geom_point(data=data.frame_2,aes(x=tau_a_no_bayes,y=diff))+
+     geom_hline(aes(yintercept=0), colour="#BB0000", linetype="dashed")
 
 res_replicate3$tau_a_bayes
 ```
