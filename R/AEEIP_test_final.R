@@ -47,7 +47,7 @@ AEEIP_test_final <- function(AEEIP_test_list,r_t_pure,r_t_mix,beta,alpha_a=NA,al
   res_final <- EM_function(r_t_pure=r_t_pure,r_t_mix=r_t_mix,beta=beta,alpha_a=alpha_a,
                            alpha_b=alpha_b,tau_a=tau_a,l=l,prop=prop_vector[index],
                            max_iteration =max_iteration,stop_stepsize=stop_stepsize)
-  if(index==1){
+  if(index<=2){
     print("please reduce the size parameter or the prop_vector of the AEEIP_test_list")
     print(paste0("the antibody bias is lower than ",res_final[["tau_a_bayes"]]))
   }else{
