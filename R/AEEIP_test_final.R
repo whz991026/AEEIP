@@ -11,6 +11,8 @@
 #' @param prop_vector the vector of the prop of the beta hyper parameter same as AEEIP_test_list
 #' @param max_iteration max iteration same as AEEIP_test_list
 #' @param stop_stepsize the threshold for stop same as AEEIP_test_list
+#' @param threshold_1 the threshold for slope
+#' @param threshold_2 the threshold for difference
 #'
 #' @return final list, and two dataframe for visualization
 #' @export
@@ -18,7 +20,7 @@
 #'
 AEEIP_test_final <- function(AEEIP_test_list,r_t_pure,r_t_mix,beta,alpha_a=NA,alpha_b=NA,tau_a,l,
                              prop_vector=seq(0.01,0.99,by=0.01),
-                             max_iteration =1e6,stop_stepsize=1e-7){
+                             max_iteration =1e6,stop_stepsize=1e-7,threshold_1=0.01,threshold_2=0.01){
 
   # plot
   data.frame_1 <- as.data.frame(cbind(AEEIP_test_list$tau_a_no_bayes_vector_aeeip,
@@ -38,8 +40,8 @@ AEEIP_test_final <- function(AEEIP_test_list,r_t_pure,r_t_mix,beta,alpha_a=NA,al
   # we select the smallest tau the derivative >0.01
   index <- min(intersect(which(diff(AEEIP_test_list$tau_a_no_bayes_vector_aeeip-
                             AEEIP_test_list$lm_tau_vector)/
-                       diff(AEEIP_test_list$tau_a_no_bayes_vector_aeeip)>0.01),
-                         which(abs(AEEIP_test_list$tau_a_no_bayes_vector_aeeip-AEEIP_test_list$lm_tau_vector)<=0.01)))+
+                       diff(AEEIP_test_list$tau_a_no_bayes_vector_aeeip)>threshold_1),
+                         which(abs(AEEIP_test_list$tau_a_no_bayes_vector_aeeip-AEEIP_test_list$lm_tau_vector)<=threshold_2)))+
     1 # +1 because the derivative is length-1
 
   if(length(index)==0|is.na(index)|is.infinite(index)|is.null(index)){
