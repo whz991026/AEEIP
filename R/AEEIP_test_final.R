@@ -41,7 +41,7 @@ AEEIP_test_final <- function(AEEIP_test_list,r_t_pure,r_t_mix,beta,alpha_a=NA,al
   index <- min(intersect(which(diff(AEEIP_test_list$tau_a_no_bayes_vector_aeeip-
                             AEEIP_test_list$lm_tau_vector)/
                        diff(AEEIP_test_list$tau_a_no_bayes_vector_aeeip)>threshold_1),
-                         which(AEEIP_test_list$tau_a_no_bayes_vector_aeeip-AEEIP_test_list$lm_tau_vector<=threshold_2)))+
+                         which(abs(AEEIP_test_list$tau_a_no_bayes_vector_aeeip-AEEIP_test_list$lm_tau_vector)<=threshold_2)))+
     1 # +1 because the derivative is length-1
 
   if(length(index)==0|is.na(index)|is.infinite(index)|is.null(index)){
